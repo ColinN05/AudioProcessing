@@ -35,6 +35,14 @@ namespace AudioLib
         bool m_ConservePower;
     };
 
+    class StereoToMonoEffect : public AudioEffect
+    {
+    public:
+        StereoToMonoEffect(const std::string& name);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+    };
+
     class GainEffect : public AudioEffect
     {
     public:

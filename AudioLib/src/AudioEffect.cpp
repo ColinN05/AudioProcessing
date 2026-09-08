@@ -46,6 +46,32 @@ namespace AudioLib
         audioFile.m_Samples = std::move(stereoSamples);
         audioFile.m_Channels = 2;
     }
+
+    StereoToMonoEffect::StereoToMonoEffect(const std::string& name)
+        : AudioEffect(name) {}
+
+    void StereoToMonoEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        if (audioFile.GetChannels() != 2)
+        {
+            std::cout << "Audio file is not stereo!\n";
+            assert(false && "Audio file is not stereo!");
+            return;
+        }
+        const std::vector<float>& stereoSamples = audioFile.GetSamples();
+        size_t stereoSampleCount = stereoSamples.size();
+        assert((stereoSampleCount%2)==0 && "Stereo audio file should have even number of samples.");
+        size_t monoSampleCount = stereoSampleCount/2;
+        std::vector<float> monoSamples(monoSampleCount);
+        for (size_t i = 0; i < monoSampleCount; ++i)
+        {
+            float stereoSampleLeft = stereoSamples[2*i];
+            float stereoSampleRight = stereoSamples[2*i+1];
+            monoSamples[i] = (stereoSampleLeft+stereoSampleRight)*0.5f;
+        }
+        audioFile.m_Samples = std::move(monoSamples);
+        audioFile.m_Channels = 1;
+    }
     
     GainEffect::GainEffect(const std::string& name, float gainFactor)
         : AudioEffect(name), m_GainFactor(gainFactor) {}

@@ -25,4 +25,8 @@ int main()
     AudioLib::MonoToStereoEffect monoToStereo("monoToStereo", false);
     AudioLib::AudioFile audioFileStereo = monoToStereo.Apply(audioFile);
     audioFileStereo.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_stereo.wav");
+
+    AudioLib::StereoToMonoEffect stereoToMono("stereoToMono");
+    AudioLib::AudioFile audioFileMono = stereoToMono.Apply(audioFileStereo);
+    audioFileMono.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_mono.wav");
 }
