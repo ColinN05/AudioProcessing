@@ -1,4 +1,5 @@
-add_library(AudioLib 
+add_library(AudioLib
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/AudioEffect.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/AudioFile.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/dr_wav_implementation.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/dr_mp3_implementation.cpp"

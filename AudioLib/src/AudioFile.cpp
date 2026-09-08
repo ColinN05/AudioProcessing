@@ -49,6 +49,24 @@ namespace AudioLib
 
     void AudioFile::Write(const std::string& pathstring)
     {
-        
+        drwav_data_format format = {
+            .container = drwav_container_riff,
+            .format = DR_WAVE_FORMAT_IEEE_FLOAT,
+            .channels = m_Channels,
+            .sampleRate = m_SampleRate,
+            .bitsPerSample = 32
+        };
+
+        drwav wav;
+
+        if (!drwav_init_file_write(&wav, pathstring.c_str(), &format, 0)) 
+        {
+            std::cout << "Failed to initialize .wav file write.";
+            assert(false && "Failed to initialzie .wav file write.");
+            return;
+        }
+
+        drwav_write_pcm_frames(&wav, m_FrameCount, (void*)&m_Samples[0]);
+        drwav_uninit(&wav);
     }
 }
