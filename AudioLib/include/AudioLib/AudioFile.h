@@ -30,5 +30,8 @@ namespace AudioLib
         size_t m_FrameCount;
         float m_DurationSeconds;
         std::vector<float> m_Samples;
+
+        friend class MonoToStereoEffect;
+        friend class StereoToMonoEffect;
     };
 }

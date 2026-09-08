@@ -2,16 +2,37 @@
 
 #include "AudioFile.h"
 
+#include <memory>
+
 namespace AudioLib
 {
     class AudioEffect
     {
     public:
         AudioEffect(const std::string& name);
+        virtual ~AudioEffect() = default;
         AudioFile Apply(const AudioFile& audioFile);
         virtual void ApplyInPlace(AudioFile& audioFile) = 0;
-    private:
+    protected:
         std::string m_Name;
+    };
+
+    class CompositeAudioEffect : public AudioEffect
+    {
+    public:
+        CompositeAudioEffect(const std::string& name, const std::vector<std::unique_ptr<AudioEffect>>& effects);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        std::vector<std::unique_ptr<AudioEffect>> m_Effects;
+    };
+
+    class MonoToStereoEffect : public AudioEffect
+    {
+    public:
+        MonoToStereoEffect(const std::string& name, bool conservePower = false);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        bool m_ConservePower;
     };
 
     class GainEffect : public AudioEffect

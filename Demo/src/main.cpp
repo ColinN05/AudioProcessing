@@ -21,4 +21,8 @@ int main()
     AudioLib::GainEffect oneThirdVolume("oneThirdVolume", 1/3.0f);
     AudioLib::AudioFile audioFileOneThirdVolume = oneThirdVolume.Apply(audioFile);
     audioFileOneThirdVolume.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_one_third_volume.wav");
+
+    AudioLib::MonoToStereoEffect monoToStereo("monoToStereo", false);
+    AudioLib::AudioFile audioFileStereo = monoToStereo.Apply(audioFile);
+    audioFileStereo.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_stereo.wav");
 }
