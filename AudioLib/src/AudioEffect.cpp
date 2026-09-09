@@ -148,4 +148,30 @@ namespace AudioLib
             samples[2*i+1] = rl*l+rr*r;
         }
     }
+
+    ClipEffect::ClipEffect(const std::string& name, float maxAmplitude)
+        : AudioEffect(name), m_MaxAmplitude(maxAmplitude)
+    {
+        if (m_MaxAmplitude < 0.0f || m_MaxAmplitude > 1.0f)
+        {
+            std::cout << "Max amplitude must be between 0 and 1.\n";
+            assert(false && "Max amplitude must be between 0 and 1");
+        }
+    }
+
+    void ClipEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        std::vector<float>& samples = audioFile.GetSamples();
+        for (float& sample : samples)
+        {
+            if (sample < -m_MaxAmplitude)
+            {
+                sample = -m_MaxAmplitude;
+            }
+            else if (sample > m_MaxAmplitude)
+            {
+                sample = m_MaxAmplitude;
+            }
+        }
+    }
 }

@@ -43,4 +43,12 @@ int main()
     audioFilePannedLeft.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_panned_left.wav");
     AudioLib::AudioFile audioFileStereoPannedLeft = panLeft.Apply(audioFileStereo);
     audioFileStereoPannedLeft.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_stereo_panned_left.wav");
+
+    AudioLib::ClipEffect volumeClip("volumeClip", 0.005f);
+    AudioLib::AudioFile audioFileVolumeClipped = volumeClip.Apply(audioFile);
+    audioFileVolumeClipped.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_volume_clipped.wav");
+
+    AudioLib::GainEffect increaseVolume("increaseVolume", 1/0.005f);
+    auto audioFileIncreasedVolume = increaseVolume.Apply(audioFileVolumeClipped);
+    audioFileIncreasedVolume.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_increased_volume.wav");
 }

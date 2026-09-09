@@ -62,4 +62,13 @@ namespace AudioLib
         void ApplyInPlaceStereo(AudioFile& audioFile);
         float m_Angle;
     };
+
+    class ClipEffect : public AudioEffect
+    {
+    public:
+        ClipEffect(const std::string& name, float maxAmplitude);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        float m_MaxAmplitude;
+    };
 }
