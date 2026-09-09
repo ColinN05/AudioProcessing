@@ -84,10 +84,6 @@ namespace AudioLib
         MixEffect(const std::string& name, AudioFile* mixer, float mix, float offsetSeconds);
         void ApplyInPlace(AudioFile& audioFile);
     private:
-        void ApplyInPlaceMonoMono(AudioFile& audioFile);
-        void ApplyInPlaceMonoStereo(AudioFile& audioFile);
-        void ApplyInPlaceStereoMono(AudioFile& audioFile);
-        void ApplyInPlaceStereoStereo(AudioFile& audioFile);
         AudioFile* m_Mixer;
         float m_Mix;
         float m_OffsetSeconds;

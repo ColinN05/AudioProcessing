@@ -190,35 +190,6 @@ namespace AudioLib
         assert(m_OffsetSeconds >= -m_Mixer->GetDurationSeconds());
     }
 
-    void MixEffect::ApplyInPlaceMonoMono(AudioFile& audioFile)
-    {
-        int lowerSeconds = std::max(m_OffsetSeconds,0.0f);
-        int lowerIndex = lowerSeconds * audioFile.GetSampleRate();
-        int upperSeconds = std::min(m_OffsetSeconds+m_Mixer->GetDurationSeconds(),audioFile.GetDurationSeconds());
-        int upperIndex = upperSeconds * audioFile.GetSampleRate();
-        const auto& mixerSamples = m_Mixer->GetSamples();
-        auto& samples = audioFile.GetSamples();
-        for (int i = lowerIndex; i <= upperIndex; ++i)
-        {
-            samples[i] = samples[i] * (1.0f-m_Mix) + mixerSamples[i-lowerIndex] * m_Mix;
-        }
-    }
-
-    void MixEffect::ApplyInPlaceMonoStereo(AudioFile& audioFile)
-    {
-
-    }
-
-    void MixEffect::ApplyInPlaceStereoMono(AudioFile& audioFile)
-    {
-
-    }
-
-    void MixEffect::ApplyInPlaceStereoStereo(AudioFile& audioFile)
-    {
-
-    }
-
     void MixEffect::ApplyInPlace(AudioFile& audioFile)
     {
         assert(m_OffsetSeconds <= audioFile.GetDurationSeconds());
@@ -232,15 +203,48 @@ namespace AudioLib
 
         int mixerChannels = m_Mixer->GetChannels();
         int channels = audioFile.GetChannels();
+        
+        int lowerSeconds = std::max(m_OffsetSeconds,0.0f);
+        int lowerIndex = lowerSeconds * audioFile.GetSampleRate();
+        int upperSeconds = std::min(m_OffsetSeconds+m_Mixer->GetDurationSeconds(),audioFile.GetDurationSeconds());
+        int upperIndex = upperSeconds * audioFile.GetSampleRate();
+
+        const auto& mixerSamples = m_Mixer->GetSamples();
+        auto& samples = audioFile.GetSamples();
+
+        int indexOffset = m_OffsetSeconds*m_Mixer->GetSampleRate();
 
         if (mixerChannels == 1 && channels == 1)
-            ApplyInPlaceMonoMono(audioFile);
+        {
+            for (int i = lowerIndex; i <= upperIndex; ++i)
+            {
+                samples[i] = samples[i] * (1.0f-m_Mix) + mixerSamples[i-indexOffset] * m_Mix;
+            }
+        }
         else if (mixerChannels == 1 && channels == 2)
-            ApplyInPlaceMonoStereo(audioFile);
+        {
+            for (int i = lowerIndex; i <= upperIndex; ++i)
+            {
+                samples[2*i] = samples[2*i] * (1.0f - m_Mix) + mixerSamples[i-indexOffset] * m_Mix;
+                samples[2*i+1] = samples[2*i];
+            }
+        }
         else if (mixerChannels == 2 && channels == 1)
-            ApplyInPlaceStereoMono(audioFile);
+        {
+            for (int i = lowerIndex; i <= upperIndex; ++i)
+            {
+                float avg = (mixerSamples[2*(i-indexOffset)] + mixerSamples[2*(i-indexOffset)+1]) * 0.5f;
+                samples[i] = samples[i] * (1.0f - m_Mix) + avg * m_Mix;
+            }
+        }
         else if (mixerChannels == 2 && channels == 2)
-            ApplyInPlaceStereoStereo(audioFile);
+        {
+            for (int i = lowerIndex; i <= upperIndex; ++i)
+            {
+                samples[2*i] = samples[2*i] * (1.0f - m_Mix) + mixerSamples[2*(i-indexOffset)] * m_Mix;
+                samples[2*i+1] = samples[2*i+1] * (1.0f - m_Mix) + mixerSamples[2*(i-indexOffset)+1] * m_Mix;
+            }
+        }
         else
         {
             std::cout << "Cannot mix. Invaid channel counts.\n";
