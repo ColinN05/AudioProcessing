@@ -15,6 +15,14 @@ namespace AudioLib
         ApplyInPlace(copy);
         return copy;
     }
+    
+    void CompositeAudioEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        for (const std::unique_ptr<AudioEffect>& effect : m_Effects)
+        {
+            effect->ApplyInPlace(audioFile);
+        }
+    }
 
     MonoToStereoEffect::MonoToStereoEffect(const std::string& name, bool conservePower)
         : AudioEffect(name), m_ConservePower(conservePower) {}

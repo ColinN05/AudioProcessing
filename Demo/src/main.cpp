@@ -51,4 +51,12 @@ int main()
     AudioLib::GainEffect increaseVolume("increaseVolume", 1/0.005f);
     auto audioFileIncreasedVolume = increaseVolume.Apply(audioFileVolumeClipped);
     audioFileIncreasedVolume.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_increased_volume.wav");
+
+    AudioLib::CompositeAudioEffect panLeftAndTripleVolume(
+        "panLeftAndTripleVolume",
+        std::make_unique<AudioLib::PanEffect>("panLeft", 3*pi/4),
+        std::make_unique<AudioLib::GainEffect>("tripleVolume", 3.0f)
+    );
+    AudioLib::AudioFile audioFilePannedLeftAndTripleVolume = panLeftAndTripleVolume.Apply(audioFile);
+    audioFilePannedLeftAndTripleVolume.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_panned_left_and_triple_volume.wav");
 }

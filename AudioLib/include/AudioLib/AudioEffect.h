@@ -20,7 +20,13 @@ namespace AudioLib
     class CompositeAudioEffect : public AudioEffect
     {
     public:
-        CompositeAudioEffect(const std::string& name, const std::vector<std::unique_ptr<AudioEffect>>& effects);
+        template <typename... Effects>
+        CompositeAudioEffect(const std::string& name, Effects&&... effects)
+            : AudioEffect(name)
+        {
+            m_Effects.reserve(sizeof...(Effects));
+            (m_Effects.emplace_back(std::forward<Effects>(effects)), ...);
+        }
         void ApplyInPlace(AudioFile& audioFile) override;
     private:
         std::vector<std::unique_ptr<AudioEffect>> m_Effects;
