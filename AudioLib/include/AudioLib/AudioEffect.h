@@ -51,4 +51,15 @@ namespace AudioLib
     private:
         float m_GainFactor;
     };
+
+    class PanEffect : public AudioEffect
+    {
+    public:
+        PanEffect(const std::string& name, float angle);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        void ApplyInPlaceMono(AudioFile& audioFile);
+        void ApplyInPlaceStereo(AudioFile& audioFile);
+        float m_Angle;
+    };
 }

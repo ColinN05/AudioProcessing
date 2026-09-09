@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <cmath>
 
 namespace AudioLib
 {
@@ -81,6 +82,70 @@ namespace AudioLib
         for (float& sample : audioFile.GetSamples())
         {
             sample *= m_GainFactor;
+        }
+    }
+
+    PanEffect::PanEffect(const std::string& name, float angle)
+    : AudioEffect(name), m_Angle(angle) {}
+
+    void PanEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        unsigned int channels = audioFile.GetChannels();
+        if (channels == 1)
+        {
+            ApplyInPlaceMono(audioFile);
+        }
+        else if (channels == 2)
+        {
+            ApplyInPlaceStereo(audioFile);
+        }
+        else
+        {
+            std::cout << "Invalid number of channels. Pan effect is only supported for mono and stereo audio files.\n";
+            assert(false && "Invalid number of channels.");
+        }
+    }
+
+    void PanEffect::ApplyInPlaceMono(AudioFile& audioFile)
+    {
+        MonoToStereoEffect monoToStereo("m2s", false);
+        monoToStereo.ApplyInPlace(audioFile);
+        float leftGain = (std::sinf(m_Angle)-std::cosf(m_Angle))*0.7071f;
+        float rightGain = -leftGain;
+        auto clampPositive = [](float& x) {if (x<0) x=0;};
+        clampPositive(leftGain);
+        clampPositive(rightGain);
+        std::vector<float>& samples = audioFile.GetSamples();
+        size_t frameCount = audioFile.GetFrameCount();
+        for (int i = 0; i < frameCount; ++i)
+        {
+            samples[2*i] *= leftGain;
+            samples[2*i+1] *= rightGain;
+        }
+    }
+
+    void PanEffect::ApplyInPlaceStereo(AudioFile& audioFile)
+    {
+        float c = std::cosf(m_Angle-3.1416f/4.0f);
+        float ll = c;
+        float lr = -c;
+        float rl = -c;
+        float rr = c;
+
+        auto clampPositive = [](float& x) {if (x<0) x=0;};
+        clampPositive(ll);
+        clampPositive(lr);
+        clampPositive(rl);
+        clampPositive(rr);
+
+        std::vector<float>& samples = audioFile.GetSamples();
+        size_t frameCount = audioFile.GetFrameCount();
+        for (int i = 0; i < frameCount; ++i)
+        {
+            float l = samples[2*i];
+            float r = samples[2*i+1];
+            samples[2*i] = ll*l+lr*r;
+            samples[2*i+1] = rl*l+rr*r;
         }
     }
 }

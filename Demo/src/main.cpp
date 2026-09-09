@@ -29,4 +29,18 @@ int main()
     AudioLib::StereoToMonoEffect stereoToMono("stereoToMono");
     AudioLib::AudioFile audioFileMono = stereoToMono.Apply(audioFileStereo);
     audioFileMono.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_mono.wav");
+
+    constexpr float pi = 3.1415926f;
+
+    AudioLib::PanEffect panRight("panRight", 3*pi/4);
+    AudioLib::AudioFile audioFilePannedRight = panRight.Apply(audioFile);
+    audioFilePannedRight.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_panned_right.wav");
+    AudioLib::AudioFile audioFileStereoPannedRight = panRight.Apply(audioFileStereo);
+    audioFileStereoPannedRight.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_stereo_panned_right.wav");
+
+    AudioLib::PanEffect panLeft("panLeft", pi/4);
+    AudioLib::AudioFile audioFilePannedLeft = panLeft.Apply(audioFile);
+    audioFilePannedLeft.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_panned_left.wav");
+    AudioLib::AudioFile audioFileStereoPannedLeft = panLeft.Apply(audioFileStereo);
+    audioFileStereoPannedLeft.Write("/home/colin/dev/AudioProcessing/TestAudioFiles/test_stereo_panned_left.wav");
 }
