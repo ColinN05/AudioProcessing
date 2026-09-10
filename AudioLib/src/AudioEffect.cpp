@@ -337,6 +337,7 @@ namespace AudioLib
         {
             std::cout << "Invalid number of channels.\n"; 
             assert(false && "Invalid number of channels.");
+            return;
         }
 
         std::vector<float>& samples = audioFile.GetSamples(); 
@@ -385,6 +386,72 @@ namespace AudioLib
             {
                 samples[channels*i+c] = samplesProcessed[i].real();
             }
+        }
+    }
+
+    ConvolutionReverbEffect::ConvolutionReverbEffect(const std::string& name, std::unique_ptr<AudioFile> reverbFile)
+        : AudioEffect(name), m_ReverbFile(std::move(reverbFile))
+    {
+        assert(m_ReverbFile);
+        assert(m_ReverbFile->GetChannels() == 1 && "Only single-channel impulse responses are supported.");
+    }
+
+    void ConvolutionReverbEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        if (audioFile.GetChannels() != 1)
+        {
+            std::cout << "Convolution reverb is only supported for single channel audio files.\n";
+            assert(false && "AudioFile must be single-channel.");
+            return;
+        }
+
+        AudioFile* reverbFile;
+        bool resampleRequired = false;
+        if (m_ReverbFile->GetSampleRate() == audioFile.GetSampleRate())
+        {
+            reverbFile = m_ReverbFile.get();
+        }
+        else
+        {
+            resampleRequired = true;
+            reverbFile = new AudioFile(*m_ReverbFile);
+            ResampleEffect resampler("resampler", audioFile.GetSampleRate());
+            resampler.ApplyInPlace(*reverbFile);
+        }
+
+        std::vector<float>& samples = audioFile.GetSamples(); 
+        std::vector<float> reverbSamples = reverbFile->GetSamples();
+
+        reverbSamples.resize(samples.size(), 0.0f);
+
+        int n = 1;
+        while (n < samples.size())
+        {
+            n <<= 1;
+        }
+        samples.resize(n,0.0f);
+        reverbSamples.resize(n,0.0f);
+
+        auto fftsamples = fft(samples);
+        auto fftreverbSamples = fft(reverbSamples);
+
+        std::vector<complex> samplesComplex(samples.size());
+
+        for (int i = 0; i < samples.size(); ++i)
+        {
+            samplesComplex[i] = fftsamples[i]*fftreverbSamples[i];
+        }
+
+        samplesComplex = std::move(fft(samplesComplex,true));
+
+        for (int i = 0; i < samples.size(); ++i)
+        {
+            samples[i] = samplesComplex[i].real();
+        }
+
+        if (resampleRequired)
+        {
+            delete reverbFile;
         }
     }
 }

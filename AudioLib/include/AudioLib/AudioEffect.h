@@ -119,4 +119,13 @@ namespace AudioLib
         float m_LowFreq;
         float m_HighFreq;
     };
+
+    class ConvolutionReverbEffect : public AudioEffect
+    {
+    public:
+        ConvolutionReverbEffect(const std::string& name, std::unique_ptr<AudioFile> reverbFile);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        std::unique_ptr<AudioFile> m_ReverbFile;
+    };
 }

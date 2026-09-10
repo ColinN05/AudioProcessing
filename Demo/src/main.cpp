@@ -131,4 +131,17 @@ int main()
     GainEffect gainEffect("gainEffect", 10.0f);
     gainEffect.ApplyInPlace(af1sBandPassFiltered);
     af1sBandPassFiltered.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_bandpassfiltered.wav");
+
+    ConvolutionReverbEffect reverb1(
+        "reverb", 
+        std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_0.3s_06w_100Hz_02m.wav")
+    );
+    ConvolutionReverbEffect reverb2(
+        "reverb", 
+        std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_4.8s_99w_900Hz_30m.wav")
+    );
+    AudioFile af1mReverb1 = reverb1.Apply(af1m);
+    af1mReverb1.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb1.wav");
+    AudioFile af1mReverb2 = reverb2.Apply(af1m);
+    af1mReverb2.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb2.wav");
 }
