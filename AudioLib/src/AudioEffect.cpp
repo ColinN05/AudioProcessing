@@ -251,4 +251,40 @@ namespace AudioLib
             assert(false && "Invalid channel counts.");
         }
     }
+
+    ResampleEffect::ResampleEffect(const std::string& name, unsigned int targetSampleRate)
+        : AudioEffect(name), m_TargetSampleRate(targetSampleRate) 
+    {
+        if (m_TargetSampleRate < 1)
+        {
+            std::cout << "Target sample rate must be at least 1hz.\n";
+            assert(false && "Invalid target sample rate.");
+        }
+    }
+
+
+    void ResampleEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        unsigned int sampleRate = audioFile.GetSampleRate();
+        unsigned int frameCount = audioFile.GetFrameCount();
+        float resampleRatio = static_cast<float>(m_TargetSampleRate) / sampleRate;
+        unsigned int resampledFrameCount = static_cast<unsigned int>(frameCount * resampleRatio); 
+        unsigned int channels = audioFile.GetChannels();
+        std::vector<float>& samples = audioFile.GetSamples();
+        std::vector<float> newSamples(resampledFrameCount*channels);
+        for (int i = 0; i < resampledFrameCount; ++i)
+        {
+            unsigned int l = (static_cast<float>(i)/resampledFrameCount)*frameCount;
+            unsigned int r = std::min(l+1,frameCount-1);
+            float interpFactor = (i-l*resampleRatio)/((r-l)*resampleRatio);
+
+            for (int c = 0; c < channels; ++c)
+            {
+                newSamples[channels*i+c] = (1.0f-interpFactor)*samples[channels*l+c] + interpFactor*samples[channels*r+c];
+            }
+        }
+        samples = std::move(newSamples);
+        audioFile.m_SampleRate = m_TargetSampleRate;
+        audioFile.m_FrameCount = resampledFrameCount;
+    }
 }

@@ -88,4 +88,13 @@ namespace AudioLib
         float m_Mix;
         float m_OffsetSeconds;
     };
+
+    class ResampleEffect : public AudioEffect
+    {
+    public:
+        ResampleEffect(const std::string& name, unsigned int targetSampleRate);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        unsigned int m_TargetSampleRate;
+    };
 }

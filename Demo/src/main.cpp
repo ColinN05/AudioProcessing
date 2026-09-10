@@ -95,4 +95,12 @@ int main()
             }
         }
     }    
+
+    ResampleEffect downsampler("downsampler", 4'500);
+    AudioFile af1sDownsampled = downsampler.Apply(af1s);
+    af1sDownsampled.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_downsampled.wav");
+
+    ResampleEffect upsampler("upsampler", 44'100);
+    AudioFile af1mUpsampled = upsampler.Apply(af1m);
+    af1mUpsampled.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_upsampled.wav");
 }
