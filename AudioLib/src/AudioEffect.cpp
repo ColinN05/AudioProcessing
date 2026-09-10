@@ -287,4 +287,38 @@ namespace AudioLib
         audioFile.m_SampleRate = m_TargetSampleRate;
         audioFile.m_FrameCount = resampledFrameCount;
     }
+
+    CompressorEffect::CompressorEffect(const std::string& name, float threshold, float rate, float attackSeconds, float fadeSeconds)
+        : AudioEffect(name), m_Threshold(threshold), m_Rate(rate), m_AttackSeconds(attackSeconds), m_FadeSeconds(fadeSeconds)
+    {
+        assert(m_Rate > 0.0f);
+        assert(m_AttackSeconds > 0.0f);
+        assert(m_FadeSeconds > 0.0f);
+    }
+
+    void CompressorEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        std::vector<float>& samples = audioFile.GetSamples();
+        int channels = audioFile.GetChannels();
+        int frameCount = audioFile.GetFrameCount();
+        float dt = 1.0f / audioFile.GetSampleRate();
+        std::vector<float> compressorFactors(channels,0.0f);
+        for (int i = 0; i < frameCount; ++i)
+        {
+            for (int c = 0; c < channels; ++c)
+            {
+                float& sample = samples[channels*i+c];
+                float abssample = std::abs(sample);
+                float sampleSign = (sample >= 0.0f) ? 1.0f : -1.0f;
+
+                if (abssample > m_Threshold)
+                {
+                    compressorFactors[c] = std::min(1.0f,compressorFactors[c]+dt/m_AttackSeconds);
+
+                    float compressedSample = ((abssample - m_Threshold) / m_Rate + m_Threshold)*sampleSign;
+                    sample = sample * (1.0f-compressorFactors[c]) + compressedSample * compressorFactors[c];
+                }
+            }
+        }
+    }
 }

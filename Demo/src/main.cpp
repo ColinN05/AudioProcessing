@@ -103,4 +103,10 @@ int main()
     ResampleEffect upsampler("upsampler", 44'100);
     AudioFile af1mUpsampled = upsampler.Apply(af1m);
     af1mUpsampled.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_upsampled.wav");
+
+    CompressorEffect compressor("compressor", 0.0001f, 4.0f, 1.0f, 0.01f);
+    AudioFile af1mCompressed = compressor.Apply(af1m);
+    af1mCompressed.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_compressed.wav");
+    AudioFile af1sCompressed = compressor.Apply(af1s);
+    af1mCompressed.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_compressed.wav");
 }

@@ -97,4 +97,16 @@ namespace AudioLib
     private:
         unsigned int m_TargetSampleRate;
     };
+
+    class CompressorEffect : public AudioEffect
+    {
+    public:
+        CompressorEffect(const std::string& name, float threshold, float rate, float attackSeconds, float fadeSeconds);
+        void ApplyInPlace(AudioFile& audioFile);
+    private:
+        float m_Threshold;
+        float m_Rate;
+        float m_AttackSeconds;
+        float m_FadeSeconds;
+    };
 }
