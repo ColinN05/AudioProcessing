@@ -3,6 +3,7 @@ add_library(AudioLib
         "${CMAKE_CURRENT_SOURCE_DIR}/src/AudioFile.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/dr_wav_implementation.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/dr_mp3_implementation.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/fft.cpp"
 )
 
 target_include_directories(AudioLib 

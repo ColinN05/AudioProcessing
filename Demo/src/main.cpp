@@ -2,6 +2,7 @@
 
 #include "AudioLib/AudioEffect.h"
 #include "AudioLib/AudioFile.h"
+#include "AudioLib/fft.h"
 
 using namespace AudioLib;
 
@@ -109,4 +110,16 @@ int main()
     af1mCompressed.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_compressed.wav");
     AudioFile af1sCompressed = compressor.Apply(af1s);
     af1mCompressed.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_compressed.wav");
+
+    std::vector<float> samples = {1,2,3,4};
+    std::vector<complex> fftsamples = fft(samples);
+    for (complex c : fftsamples)
+    {
+        std::cout << c << '\n';
+    }
+    std::vector<complex> a = fft(fftsamples, true);
+    for (complex c : a)
+    {
+        std::cout << c << '\n'; 
+    }
 }
