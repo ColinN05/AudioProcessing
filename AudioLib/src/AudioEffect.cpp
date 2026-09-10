@@ -1,5 +1,7 @@
 #include "AudioEffect.h"
 
+#include "fft.h"
+
 #include <cassert>
 #include <iostream>
 #include <cmath>
@@ -318,6 +320,70 @@ namespace AudioLib
                     float compressedSample = ((abssample - m_Threshold) / m_Rate + m_Threshold)*sampleSign;
                     sample = sample * (1.0f-compressorFactors[c]) + compressedSample * compressorFactors[c];
                 }
+            }
+        }
+    }
+
+    BandPassFilterEffect::BandPassFilterEffect(const std::string& name, float lowFreq, float highFreq)
+        : AudioEffect(name), m_LowFreq(lowFreq), m_HighFreq(highFreq)
+    {
+        assert(lowFreq >= 0.0f && highFreq >= 0.0f && lowFreq <= highFreq);
+    }
+
+    void BandPassFilterEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        unsigned int channels = audioFile.GetChannels();
+        if (channels < 1)
+        {
+            std::cout << "Invalid number of channels.\n"; 
+            assert(false && "Invalid number of channels.");
+        }
+
+        std::vector<float>& samples = audioFile.GetSamples(); 
+        unsigned int frameCount = audioFile.GetFrameCount();
+
+        for (int c = 0; c < channels; ++c)
+        {
+            std::vector<float> channelSamples(frameCount);
+
+            for (int i = 0; i < frameCount; ++i)
+            {
+                channelSamples[i] = samples[channels*i+c];
+            }
+
+            std::vector<float> channelSamplesPadded = channelSamples;
+            
+            unsigned int n = 1;
+            while (n < frameCount)
+            {
+                n <<= 1;
+            }
+
+            channelSamplesPadded.reserve(n);
+
+            for (int i = channelSamples.size(); i < n; ++i)
+            {
+                channelSamplesPadded.push_back(0);
+            }
+
+            std::vector<complex> dftsamples = fft(channelSamplesPadded);
+
+            float fs = audioFile.GetSampleRate();
+
+            for (int k = 0; k < m_LowFreq*n/fs && k < n; ++k)
+            {
+                dftsamples[k] = 0;
+            }
+            for (int k = m_HighFreq*n/fs; k < n; ++k)
+            {
+                dftsamples[k] = 0;
+            }
+
+            std::vector<complex> samplesProcessed = fft(dftsamples, true);
+            
+            for (int i = 0; i < frameCount; ++i)
+            {
+                samples[channels*i+c] = samplesProcessed[i].real();
             }
         }
     }

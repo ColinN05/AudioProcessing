@@ -122,4 +122,13 @@ int main()
     {
         std::cout << c << '\n'; 
     }
+
+    BandPassFilterEffect bandPassFilter("bandPassFilter", 439.5f, 440.5f);
+    AudioFile af1mBandPassFiltered = bandPassFilter.Apply(af1m);
+    af1mBandPassFiltered.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_bandpassfiltered.wav");
+
+    AudioFile af1sBandPassFiltered = bandPassFilter.Apply(af1s);
+    GainEffect gainEffect("gainEffect", 10.0f);
+    gainEffect.ApplyInPlace(af1sBandPassFiltered);
+    af1sBandPassFiltered.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_bandpassfiltered.wav");
 }

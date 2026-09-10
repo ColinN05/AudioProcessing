@@ -102,11 +102,21 @@ namespace AudioLib
     {
     public:
         CompressorEffect(const std::string& name, float threshold, float rate, float attackSeconds, float fadeSeconds);
-        void ApplyInPlace(AudioFile& audioFile);
+        void ApplyInPlace(AudioFile& audioFile) override;
     private:
         float m_Threshold;
         float m_Rate;
         float m_AttackSeconds;
         float m_FadeSeconds;
+    };
+
+    class BandPassFilterEffect : public AudioEffect
+    {
+    public:
+        BandPassFilterEffect(const std::string& name, float lowFreq, float highFreq);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        float m_LowFreq;
+        float m_HighFreq;
     };
 }
