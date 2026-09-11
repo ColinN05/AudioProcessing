@@ -128,4 +128,21 @@ namespace AudioLib
     private:
         std::unique_ptr<AudioFile> m_ReverbFile;
     };
+
+    class NoiseEffect : public AudioEffect
+    {
+    public:
+        enum class Type
+        {
+            White, Brownian
+        };
+
+        NoiseEffect(const std::string& name, Type type, float intensity);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        void ApplyInPlaceWhite(AudioFile& audioFile);
+        void ApplyInPlaceBrownian(AudioFile& audioFile);
+        Type m_Type;
+        float m_Intensity;
+    };
 }

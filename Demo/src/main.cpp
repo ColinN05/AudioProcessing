@@ -132,16 +132,26 @@ int main()
     gainEffect.ApplyInPlace(af1sBandPassFiltered);
     af1sBandPassFiltered.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_bandpassfiltered.wav");
 
-    ConvolutionReverbEffect reverb1(
-        "reverb", 
-        std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_0.3s_06w_100Hz_02m.wav")
-    );
-    ConvolutionReverbEffect reverb2(
-        "reverb", 
-        std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_4.8s_99w_900Hz_30m.wav")
-    );
-    AudioFile af1mReverb1 = reverb1.Apply(af1m);
-    af1mReverb1.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb1.wav");
-    AudioFile af1mReverb2 = reverb2.Apply(af1m);
-    af1mReverb2.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb2.wav");
+    // ConvolutionReverbEffect reverb1(
+    //     "reverb", 
+    //     std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_0.3s_06w_100Hz_02m.wav")
+    // );
+    // ConvolutionReverbEffect reverb2(
+    //     "reverb", 
+    //     std::make_unique<AudioFile>("/home/colin/dev/AudioProcessing/TestAudioFiles/WireGrind_m_4.8s_99w_900Hz_30m.wav")
+    // );
+    // AudioFile af1mReverb1 = reverb1.Apply(af1m);
+    // af1mReverb1.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb1.wav");
+    // AudioFile af1mReverb2 = reverb2.Apply(af1m);
+    // af1mReverb2.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_reverb2.wav");
+
+    NoiseEffect noise("noise", NoiseEffect::Type::White, 1.0f);
+    AudioFile af1mWhiteNoise = noise.Apply(af1m);
+    af1mWhiteNoise.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_whitenoise.wav");
+    AudioFile af1sWhiteNoise = noise.Apply(af1s);
+    af1sWhiteNoise.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_whitenoise.wav");
+
+    NoiseEffect brownianNoise("brownianNoise", NoiseEffect::Type::Brownian, 0.25f);
+    AudioFile af1mBrownianNoise = brownianNoise.Apply(af1m);
+    af1mBrownianNoise.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_browniannoise.wav");
 }

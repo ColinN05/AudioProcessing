@@ -5,6 +5,7 @@
 #include <cassert>
 #include <iostream>
 #include <cmath>
+#include <random>
 
 namespace AudioLib
 {
@@ -452,6 +453,92 @@ namespace AudioLib
         if (resampleRequired)
         {
             delete reverbFile;
+        }
+    }
+
+    NoiseEffect::NoiseEffect(const std::string& name, Type type, float intensity)
+        : AudioEffect(name), m_Type(type), m_Intensity(intensity) {}
+    
+    void NoiseEffect::ApplyInPlaceWhite(AudioFile& audioFile)
+    {
+        std::vector<float>& samples = audioFile.GetSamples();
+        int n = 1;
+        while (n < samples.size())
+        {
+            n <<= 1;
+        }
+        std::vector<complex> whiteNoiseFreq(n,0);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(0.0f, 2.0f * static_cast<float>(M_PI));
+        for (int i = 0; i < n; ++i)
+        {
+            whiteNoiseFreq[i] += std::polar(1.0f,dist(gen));
+        }
+
+        std::vector<complex> whiteNoise = fft(whiteNoiseFreq,true);
+
+        for (int i = 0; i < samples.size(); ++i)
+        {
+            samples[i] += m_Intensity * whiteNoise[i].real();
+        }
+    }
+
+    void NoiseEffect::ApplyInPlaceBrownian(AudioFile& audioFile)
+    {
+        std::vector<float>& samples = audioFile.GetSamples();
+
+    if (samples.empty())
+        return;
+
+        unsigned int sampleRate = audioFile.GetSampleRate();
+        unsigned int sampleCount = static_cast<int>(samples.size());
+
+        int n = 1;
+        while (n < sampleCount)
+        {
+            n <<= 1;
+        }
+
+        std::vector<complex> brownianNoiseFreq(n,0);
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> dist(0.0f, 2.0f * static_cast<float>(M_PI));
+        std::normal_distribution<float> normal(0.0f, 1.0f);
+        for (int i = 1; i < n/2; ++i)
+        {
+            float freq = static_cast<float>(i)/n * sampleRate;
+            float amplitude = 1.0f / freq;
+            float real = normal(gen) * amplitude;
+            float imag = normal(gen) * amplitude;
+            brownianNoiseFreq[i] = complex(real, imag);  
+        }
+
+        std::vector<complex> brownianNoise = fft(brownianNoiseFreq, true);
+
+        // normalize intensity by dividing by sqrt of mean square noise value
+        double sumSquares = 0.0;
+        for (int i = 0; i < sampleCount; ++i)
+        {
+            float value = brownianNoise[i].real();
+            sumSquares += static_cast<double>(value) * value;
+        }
+        float sqrtms = static_cast<float>(std::sqrt(sumSquares / static_cast<double>(sampleCount)));
+        const float scale = m_Intensity / sqrtms;
+
+        for (int i = 0; i < samples.size(); ++i)
+        {
+            samples[i] += m_Intensity * brownianNoise[i].real() * scale;
+        }
+    }
+
+    void NoiseEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        switch (m_Type)
+        {
+        case Type::White: ApplyInPlaceWhite(audioFile); break;
+        case Type::Brownian: ApplyInPlaceBrownian(audioFile); break;
+        default: std::cout << "Noise type is invalid!\n";
         }
     }
 }
