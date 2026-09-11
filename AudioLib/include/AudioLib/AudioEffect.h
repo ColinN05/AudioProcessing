@@ -145,4 +145,13 @@ namespace AudioLib
         Type m_Type;
         float m_Intensity;
     };
+
+    class PitchShiftEffect : public AudioEffect
+    {
+    public:
+        PitchShiftEffect(const std::string& name, float pitchShiftFactor);
+        void ApplyInPlace(AudioFile& audioFile) override;
+    private:
+        float m_PitchShiftFactor;
+    };
 }

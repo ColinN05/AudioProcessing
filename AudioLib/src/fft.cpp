@@ -5,7 +5,7 @@
 
 namespace AudioLib
 {
-    static void applyfft(std::vector<complex>& a, bool inverse)
+    void applyfft(std::vector<complex>& a, bool inverse)
     {
         int n = a.size();
         if (n == 1)

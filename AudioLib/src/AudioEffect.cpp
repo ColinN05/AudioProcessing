@@ -541,4 +541,69 @@ namespace AudioLib
         default: std::cout << "Noise type is invalid!\n";
         }
     }
+
+    PitchShiftEffect::PitchShiftEffect(const std::string& name, float pitchShiftFactor)
+        : AudioEffect(name), m_PitchShiftFactor(pitchShiftFactor)
+    {
+        if (m_PitchShiftFactor <= 0.0f)
+        {
+            std::cout << "Pitch shift factor must be positive.\n";
+            assert(false && "Pitch shift factor must be positive.");
+        }
+    }
+
+    void PitchShiftEffect::ApplyInPlace(AudioFile& audioFile)
+    {
+        audioFile.m_SampleRate *= m_PitchShiftFactor;
+
+        // std::vector<float>& samples = audioFile.GetSamples();
+        // unsigned int channels = audioFile.GetChannels();
+        // unsigned int frameCount = audioFile.GetFrameCount();
+
+        // int n = 1;
+        // while (n < frameCount)
+        // {
+        //     n <<= 1;
+        // }
+
+        // std::vector<complex> channelSamples(n,0);
+
+        // for (int c = 0; c < channels; ++c)
+        // {
+        //     for (int i = 0; i < frameCount; ++i)
+        //     {
+        //         channelSamples[i] = static_cast<complex>(samples[channels*i+c]);
+        //     }
+
+        //     applyfft(channelSamples);
+
+        //     if (m_PitchShiftFactor > 1.0f)
+        //     {
+        //         for (int i = n-1; i >= 0; --i)
+        //         {
+        //             channelSamples[i] = channelSamples[static_cast<int>(i/m_PitchShiftFactor)];
+        //         }
+        //     }
+        //     else
+        //     {
+        //         for (int i = 0; i < n; ++i)
+        //         {
+        //             channelSamples[i] = channelSamples[static_cast<int>(i/m_PitchShiftFactor)];
+        //         }
+        //     }
+
+        //     applyfft(channelSamples, true);
+
+        //     // unsigned int newFrameCount = static_cast<int>(frameCount/m_PitchShiftFactor);
+
+        //     for (int i = 0; i < frameCount; ++i)
+        //     {
+        //         samples[channels*i+c] = channelSamples[i].real();
+        //     }
+
+        //     audioFile.m_SampleRate /= m_PitchShiftFactor;
+
+            // audioFile.m_FrameCount = ;
+        // }
+    }
 }

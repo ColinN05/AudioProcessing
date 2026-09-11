@@ -34,5 +34,6 @@ namespace AudioLib
         friend class MonoToStereoEffect;
         friend class StereoToMonoEffect;
         friend class ResampleEffect;
+        friend class PitchShiftEffect;
     };
 }

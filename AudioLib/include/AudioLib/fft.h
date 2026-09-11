@@ -7,6 +7,7 @@ namespace AudioLib
 {
     using complex = std::complex<float>;
 
+    void applyfft(std::vector<complex>& a, bool inverse = false);
     std::vector<complex> fft(const std::vector<complex>& samples, bool inverse = false);
     std::vector<complex> fft(const std::vector<float>& samples, bool inverse = false);
 };

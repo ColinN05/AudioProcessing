@@ -154,4 +154,8 @@ int main()
     NoiseEffect brownianNoise("brownianNoise", NoiseEffect::Type::Brownian, 0.25f);
     AudioFile af1mBrownianNoise = brownianNoise.Apply(af1m);
     af1mBrownianNoise.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/mono_browniannoise.wav");
+
+    PitchShiftEffect pitchShift("pitchShift", 0.5f);
+    AudioFile af1sPitchShifted = pitchShift.Apply(af1s);
+    af1sPitchShifted.Write("/home/colin/dev/AudioProcessing/OutputAudioFiles/stereo_pitchshifted.wav");
 }
