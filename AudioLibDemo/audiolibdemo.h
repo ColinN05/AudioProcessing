@@ -2,6 +2,7 @@
 #define AUDIOLIBDEMO_H
 
 #include "card.h"
+#include "texteditstreambuf.h"
 
 #include <QMainWindow>
 #include <QVBoxLayout>
@@ -37,6 +38,8 @@ private:
          *m_PanEffectCard, *m_ClipCard, *m_ResampleCard,
          *m_CompressorCard, *m_BandPassFilterCard, *m_ConvolutionReverbCard,
          *m_NoiseCard;
+
+    TextEditStreamBuf* m_OutputStreamBuf;
 
     Ui::AudioLibDemo *ui;
 };

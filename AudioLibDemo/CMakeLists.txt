@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         audiolibdemo.ui
         effectswidget.cpp
         card.cpp
+        texteditstreambuf.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

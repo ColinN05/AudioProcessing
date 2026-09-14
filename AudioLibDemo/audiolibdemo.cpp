@@ -10,6 +10,7 @@
 #include <QRadioButton>
 #include <QScrollArea>
 #include <QSlider>
+#include <QTimer>
 
 #include <iostream>
 
@@ -38,6 +39,19 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     createClipCard();
     createResampleCard();
     createCompressorCard();
+
+    auto* m_OutputStreamBuf = new TextEditStreamBuf(ui->output);
+    std::cout.rdbuf(m_OutputStreamBuf);
+    auto* timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, 
+    [=]() {
+        std::string text = m_OutputStreamBuf->readBuffer();
+        if (!text.empty()) 
+        {
+            ui->output->appendPlainText(QString::fromStdString(text));
+        }
+    });
+    timer->start(16);
 }
 
 void AudioLibDemo::createGainEffectCard()
@@ -51,7 +65,8 @@ void AudioLibDemo::createGainEffectCard()
     QLabel* valueLabel = new QLabel("gain factor: 1.00");
 
     QObject::connect(slider, &QSlider::valueChanged,
-    [valueLabel](int value) {
+    [valueLabel](int value) 
+    {
         valueLabel->setText(QString("gain factor: ") + QString::number(value / 100.0, 'f', 2));
     });
 
@@ -258,5 +273,6 @@ void AudioLibDemo::createNoiseCard()
 
 AudioLibDemo::~AudioLibDemo()
 {
+    delete m_OutputStreamBuf;
     delete ui;
 }

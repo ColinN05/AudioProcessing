@@ -11,8 +11,5 @@ int main(int argc, char *argv[])
     AudioLibDemo w;
     w.show();
 
-    AudioLib::AudioFile audioFile("/home/colin/dev/AudioProcessing/TestAudioFiles/test.wav");
-    std::cout << "Sample rate = " << audioFile.GetSampleRate() << '\n';
-
     return a.exec();
 }
