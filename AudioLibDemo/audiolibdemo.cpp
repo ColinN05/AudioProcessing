@@ -3,6 +3,7 @@
 
 #include "card.h"
 #include "effectswidget.h"
+#include "audioplayer.h"
 
 #include <QFileDialog>
 #include <QLabel>
@@ -28,6 +29,7 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     m_EffectCardLayout = new QVBoxLayout(content);
 
     scrollArea->setWidget(content);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     createGainEffectCard();
     createConvolutionReverbCard();
@@ -52,6 +54,12 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
         }
     });
     timer->start(16);
+
+    ui->horizontalLayout_2->addWidget(new AudioPlayer("Input Audio"));
+    ui->horizontalLayout_2->addWidget(new AudioPlayer("Output Audio"));
+
+    ui->verticalLayout->insertStretch(0);
+    ui->verticalLayout->insertStretch(1);
 }
 
 void AudioLibDemo::createGainEffectCard()
@@ -268,11 +276,25 @@ void AudioLibDemo::createNoiseCard()
     m_NoiseCard->addWidget(whiteOption);
     m_NoiseCard->addWidget(brownianOption);
 
+    auto* slider = new QSlider(Qt::Horizontal);
+    slider->setRange(10,1000);
+    slider->setValue(50);
+
+    QLabel* valueLabel = new QLabel("intensity: 0.50");
+
+    QObject::connect(slider, &QSlider::valueChanged,
+    [valueLabel](int value) {
+        valueLabel->setText(QString("intensity: ") + QString::number(value/100.0f, 'f', 2));
+    });
+
+    m_NoiseCard->addWidget(valueLabel);
+    m_NoiseCard->addWidget(slider);
+
     m_EffectCardLayout->addWidget(m_NoiseCard);
 }
 
 AudioLibDemo::~AudioLibDemo()
 {
-    delete m_OutputStreamBuf;
+    // delete m_OutputStreamBuf;
     delete ui;
 }

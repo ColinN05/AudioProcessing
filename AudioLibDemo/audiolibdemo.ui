@@ -20,11 +20,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QTextEdit" name="textEdit"/>
-          </item>
-         </layout>
+         <layout class="QHBoxLayout" name="horizontalLayout_2"/>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -48,6 +44,9 @@
               <width>16777215</width>
               <height>250</height>
              </size>
+            </property>
+            <property name="lineWrapMode">
+             <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
             </property>
             <property name="readOnly">
              <bool>true</bool>
