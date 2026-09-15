@@ -2,6 +2,10 @@
 
 #include <QLabel>
 
+#include <QAudioDevice>
+#include <QAudioFormat>
+#include <QMediaDevices>
+
 #include <iostream>
 
 AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
@@ -84,5 +88,6 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
 
 void AudioPlayer::setSource(const std::string& source)
 {
+    m_MediaPlayer->stop();
     m_MediaPlayer->setSource(QUrl::fromLocalFile(QString::fromStdString(source)));
 }

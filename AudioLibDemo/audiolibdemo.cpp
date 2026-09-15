@@ -37,7 +37,7 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     createPanEffectCard();
     createMonoToStereoCard();
     createStereoToMonoCard();
-    createClipCard();
+    // createClipCard();
     createResampleCard();
     createCompressorCard();
 
@@ -164,8 +164,9 @@ void AudioLibDemo::createResampleCard()
     m_ResampleCard = new Card("Resample");
 
     auto* slider = new QSlider(Qt::Horizontal);
-    slider->setRange(1'000,48'000);
+    slider->setRange(8'000,48'000);
     slider->setValue(24'000);
+    slider->setObjectName("targetSampleRateSlider");
 
     QLabel* valueLabel = new QLabel("target sample rate: 24000hz");
 
@@ -189,12 +190,13 @@ void AudioLibDemo::createCompressorCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(1,100);
     slider->setValue(50);
+    slider->setObjectName("thresholdSlider");
 
-    QLabel* valueLabel = new QLabel("threshold: 0.50");
+    QLabel* valueLabel = new QLabel("threshold: 0.050");
 
     QObject::connect(slider, &QSlider::valueChanged,
     [valueLabel](int value) {
-        valueLabel->setText(QString("threshold: ") + QString::number(value/100.0f, 'f', 2));
+        valueLabel->setText(QString("threshold: ") + QString::number(value/1000.0f, 'f', 3));
     });
 
     m_CompressorCard->addWidget(valueLabel);
@@ -206,6 +208,7 @@ void AudioLibDemo::createCompressorCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(1, 200);
     slider->setValue(25);
+    slider->setObjectName("attackSlider");
 
     QLabel* valueLabel = new QLabel("attack: 0.25s");
 
@@ -230,6 +233,7 @@ void AudioLibDemo::createBandPassFilterCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(0,10'000);
     slider->setValue(0);
+    slider->setObjectName("lowFreqSlider");
 
     QLabel* valueLabel = new QLabel("low frequency: 0hz");
 
@@ -247,6 +251,7 @@ void AudioLibDemo::createBandPassFilterCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(0,10'000);
     slider->setValue(10'000);
+    slider->setObjectName("highFreqSlider");
 
     QLabel* valueLabel = new QLabel("high frequency: 10000hz");
 
@@ -267,7 +272,9 @@ void AudioLibDemo::createConvolutionReverbCard()
     m_ConvolutionReverbCard = new Card("Convolution Reverb");
 
     auto* lightOption = new QRadioButton("light");
+    lightOption->setObjectName("lightOption");
     auto* heavyOption = new QRadioButton("heavy");
+    heavyOption->setObjectName("heavyOption");
     lightOption->setChecked(true);
     m_ConvolutionReverbCard->addWidget(lightOption);
     m_ConvolutionReverbCard->addWidget(heavyOption);
@@ -281,12 +288,14 @@ void AudioLibDemo::createNoiseCard()
     auto* whiteOption = new QRadioButton("white");
     auto* brownianOption = new QRadioButton("brownian");
     whiteOption->setChecked(true);
+    whiteOption->setObjectName("whiteOption");
     m_NoiseCard->addWidget(whiteOption);
     m_NoiseCard->addWidget(brownianOption);
 
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(10,1000);
     slider->setValue(50);
+    slider->setObjectName("intensitySlider");
 
     QLabel* valueLabel = new QLabel("intensity: 0.50");
 
@@ -325,6 +334,10 @@ void AudioLibDemo::applyEffects()
     applyConvolutionReverb(inputFile);
     applyNoise(inputFile);
     inputFile.Write(OUTPUT_AUDIO_DIR"/output.wav");
+    m_OutputAudioPlayer->hide();
+    ui->audioPlayerHorizontalLayout->removeWidget(m_OutputAudioPlayer);
+    m_OutputAudioPlayer = new AudioPlayer("Output Audio", true);
+    ui->audioPlayerHorizontalLayout->addWidget(m_OutputAudioPlayer);
     m_OutputAudioPlayer->setSource(OUTPUT_AUDIO_DIR"/output.wav");
     std::cout << "Finished.\n";
 }
@@ -381,27 +394,80 @@ void AudioLibDemo::applyClip(AudioLib::AudioFile& audioFile)
 
 void AudioLibDemo::applyResample(AudioLib::AudioFile& audioFile)
 {
+    if (!m_ResampleCard->getEnabled())
+    {
+        return;
+    }
 
+    unsigned int targetSampleRate = static_cast<unsigned int>(m_ResampleCard->findChild<QSlider*>("targetSampleRateSlider")->value());
+
+    AudioLib::ResampleEffect resample("resample", targetSampleRate);
+    resample.ApplyInPlace(audioFile);
 }
 
 void AudioLibDemo::applyCompressor(AudioLib::AudioFile& audioFile)
 {
-    
+    if (!m_CompressorCard->getEnabled())
+    {
+        return;
+    }
+
+    float threshold = m_CompressorCard->findChild<QSlider*>("thresholdSlider")->value() / 1000.0f;
+    float attackSeconds = m_CompressorCard->findChild<QSlider*>("attackSlider")->value() / 100.0f;
+    AudioLib::CompressorEffect compressor("compressor", threshold, 4.0f, attackSeconds, 0.1f);
+    compressor.ApplyInPlace(audioFile);
 }
 
 void AudioLibDemo::applyBandPassFilter(AudioLib::AudioFile& audioFile)
 {
+    if (!m_BandPassFilterCard->getEnabled())
+    {
+        return;
+    }
 
+    float lowFreq = static_cast<float>(m_BandPassFilterCard->findChild<QSlider*>("lowFreqSlider")->value());
+    float highFreq = static_cast<float>(m_BandPassFilterCard->findChild<QSlider*>("highFreqSlider")->value());
+    AudioLib::BandPassFilterEffect bandPassFilter("bandPassFilter", lowFreq, highFreq);
+    bandPassFilter.ApplyInPlace(audioFile);
 }
 
 void AudioLibDemo::applyConvolutionReverb(AudioLib::AudioFile& audioFile)
 {
+    if (!m_ConvolutionReverbCard->getEnabled())
+    {
+        return;
+    }
 
+    std::unique_ptr<AudioLib::AudioFile> reverbFile;
+
+    bool light = m_ConvolutionReverbCard->findChild<QRadioButton*>("lightOption")->isChecked();
+
+    if (light)
+    {
+        reverbFile = std::make_unique<AudioLib::AudioFile>(TEST_AUDIO_DIR"/WireGrind_m_0.3s_06w_100Hz_02m.wav");
+    }
+    else
+    {
+        reverbFile = std::make_unique<AudioLib::AudioFile>(TEST_AUDIO_DIR"/WireGrind_m_4.8s_99w_900Hz_30m.wav");
+    }
+
+    AudioLib::ConvolutionReverbEffect convolutionReverb("convolutionReverb", std::move(reverbFile));
+    convolutionReverb.ApplyInPlace(audioFile);
 }
 
 void AudioLibDemo::applyNoise(AudioLib::AudioFile& audioFile)
 {
+    if (!m_NoiseCard->getEnabled())
+    {
+        return;
+    }
 
+    using Type = AudioLib::NoiseEffect::Type;
+    Type type = m_NoiseCard->findChild<QRadioButton*>("whiteOption")->isChecked() ? Type::White : Type::Brownian;
+    float intensity = m_NoiseCard->findChild<QSlider*>("intensitySlider")->value() / 100.0f;
+    if (type == Type::Brownian) intensity *= 0.075f;
+    AudioLib::NoiseEffect noise("noise", type, intensity);
+    noise.ApplyInPlace(audioFile);
 }
 
 AudioLibDemo::~AudioLibDemo()
