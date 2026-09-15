@@ -2,8 +2,10 @@
 
 #include <QLabel>
 
-AudioPlayer::AudioPlayer(const QString& title, QWidget* parent)
-    : QWidget(parent)
+#include <iostream>
+
+AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
+    : QWidget(parent), m_Output(output)
 {
     m_MediaPlayer = new QMediaPlayer(this);
     m_AudioOutput = new QAudioOutput(this);
@@ -13,6 +15,12 @@ AudioPlayer::AudioPlayer(const QString& title, QWidget* parent)
     m_PlayButton = new QPushButton("Play");
     connect(m_PlayButton, &QPushButton::clicked, this, 
     [=]() {
+        if (m_MediaPlayer->source().isEmpty())
+        {
+            std::cout << "Cannot play. No source has been selected.\n";
+            return;
+        }
+
         if (m_MediaPlayer->playbackState() == QMediaPlayer::PlayingState) 
         {
             m_MediaPlayer->pause();
@@ -25,17 +33,20 @@ AudioPlayer::AudioPlayer(const QString& title, QWidget* parent)
         }
     });
 
-    m_FileButton = new QPushButton("Select File");
+    if (!m_Output)
+    {
+        m_FileButton = new QPushButton("Select File");
 
-    connect(m_FileButton, &QPushButton::clicked, this, 
-    [=]() {
-        QString fileName = QFileDialog::getOpenFileName(this,"Select Audio File",QString(),"Audio Files (*.wav);;All Files (*)");
+        connect(m_FileButton, &QPushButton::clicked, this, 
+        [=]() {
+            QString fileName = QFileDialog::getOpenFileName(this,"Select Audio File",QString(),"Audio Files (*.wav);;All Files (*)");
 
-        if (!fileName.isEmpty()) 
-        {
-            m_MediaPlayer->setSource(QUrl::fromLocalFile(fileName));
-        }
-    });
+            if (!fileName.isEmpty()) 
+            {
+                m_MediaPlayer->setSource(QUrl::fromLocalFile(fileName));
+            }
+        });
+    }
 
     m_ProgressSlider = new QSlider(Qt::Horizontal);
     m_ProgressSlider->setRange(0, 0);
@@ -63,7 +74,15 @@ AudioPlayer::AudioPlayer(const QString& title, QWidget* parent)
 
     m_Layout = new QVBoxLayout(this);
     m_Layout->addWidget(new QLabel(title));
-    m_Layout->addWidget(m_FileButton);
+    if (!m_Output)
+    {
+        m_Layout->addWidget(m_FileButton);
+    }
     m_Layout->addWidget(m_PlayButton);
     m_Layout->addWidget(m_ProgressSlider);
+}
+
+void AudioPlayer::setSource(const std::string& source)
+{
+    m_MediaPlayer->setSource(QUrl::fromLocalFile(QString::fromStdString(source)));
 }

@@ -7,7 +7,6 @@
 
 #include <QFileDialog>
 #include <QLabel>
-#include <QPushButton>
 #include <QRadioButton>
 #include <QScrollArea>
 #include <QSlider>
@@ -55,11 +54,18 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     });
     timer->start(16);
 
-    ui->horizontalLayout_2->addWidget(new AudioPlayer("Input Audio"));
-    ui->horizontalLayout_2->addWidget(new AudioPlayer("Output Audio"));
+    m_InputAudioPlayer = new AudioPlayer("Input Audio");
+    ui->audioPlayerHorizontalLayout->addWidget(m_InputAudioPlayer);
+    m_OutputAudioPlayer = new AudioPlayer("Output Audio", true);
+    ui->audioPlayerHorizontalLayout->addWidget(m_OutputAudioPlayer);
 
     ui->verticalLayout->insertStretch(0);
     ui->verticalLayout->insertStretch(1);
+
+    m_ApplyEffectsButton = new QPushButton("Apply Effects");
+    ui->verticalLayout->insertWidget(3, m_ApplyEffectsButton);
+
+    connect(m_ApplyEffectsButton, &QPushButton::clicked, this, [=](){applyEffects();});
 }
 
 void AudioLibDemo::createGainEffectCard()
@@ -69,6 +75,7 @@ void AudioLibDemo::createGainEffectCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(1,300);
     slider->setValue(100);
+    slider->setObjectName("gainFactorSlider");
 
     QLabel* valueLabel = new QLabel("gain factor: 1.00");
 
@@ -102,6 +109,7 @@ void AudioLibDemo::createPanEffectCard()
     auto* slider = new QSlider(Qt::Horizontal);
     slider->setRange(0,90);
     slider->setValue(45);
+    slider->setObjectName("angleSlider");
 
     QLabel* valueLabel = new QLabel("angle: 45");
 
@@ -293,8 +301,110 @@ void AudioLibDemo::createNoiseCard()
     m_EffectCardLayout->addWidget(m_NoiseCard);
 }
 
+void AudioLibDemo::applyEffects()
+{
+    QUrl sourceUrl = m_InputAudioPlayer->getSource();
+    if (m_InputAudioPlayer->getSource().isEmpty())
+    {
+        std::cout << "No source has been selected.\n";
+        return;
+    }
+
+    std::string source = sourceUrl.toString().toStdString().substr(7);
+
+    AudioLib::AudioFile inputFile(source);
+    std::cout << "Applying audio effects . . .\n";
+    applyGain(inputFile);
+    applyMonoToStereo(inputFile);
+    applyStereoToMono(inputFile);
+    applyPan(inputFile);
+    applyClip(inputFile);
+    applyResample(inputFile);
+    applyCompressor(inputFile);
+    applyBandPassFilter(inputFile);
+    applyConvolutionReverb(inputFile);
+    applyNoise(inputFile);
+    inputFile.Write(OUTPUT_AUDIO_DIR"/output.wav");
+    m_OutputAudioPlayer->setSource(OUTPUT_AUDIO_DIR"/output.wav");
+    std::cout << "Finished.\n";
+}
+
+void AudioLibDemo::applyGain(AudioLib::AudioFile& audioFile)
+{
+    if (!m_GainEffectCard->getEnabled())
+    {
+        return;
+    }
+
+    AudioLib::GainEffect gain("gain", m_GainEffectCard->findChild<QSlider*>("gainFactorSlider")->value()/100.0f);
+    gain.ApplyInPlace(audioFile);
+}
+
+void AudioLibDemo::applyMonoToStereo(AudioLib::AudioFile& audioFile)
+{
+    if (!m_MonoToStereoCard->getEnabled())
+    {
+        return;
+    }
+
+    AudioLib::MonoToStereoEffect monoToStereo("monoToStereo");
+    monoToStereo.ApplyInPlace(audioFile);
+}
+
+void AudioLibDemo::applyStereoToMono(AudioLib::AudioFile& audioFile)
+{
+    if (!m_StereoToMonoCard->getEnabled())
+    {
+        return;
+    }
+
+    AudioLib::StereoToMonoEffect stereoToMono("stereoToMono");
+    stereoToMono.ApplyInPlace(audioFile);
+}
+
+void AudioLibDemo::applyPan(AudioLib::AudioFile& audioFile)
+{
+    if (!m_PanEffectCard->getEnabled())
+    {
+        return;
+    }
+
+    float angle = static_cast<float>(m_PanEffectCard->findChild<QSlider*>("angleSlider")->value());
+    AudioLib::PanEffect pan("pan", angle);
+    pan.ApplyInPlace(audioFile);
+}
+
+void AudioLibDemo::applyClip(AudioLib::AudioFile& audioFile)
+{
+
+}
+
+void AudioLibDemo::applyResample(AudioLib::AudioFile& audioFile)
+{
+
+}
+
+void AudioLibDemo::applyCompressor(AudioLib::AudioFile& audioFile)
+{
+    
+}
+
+void AudioLibDemo::applyBandPassFilter(AudioLib::AudioFile& audioFile)
+{
+
+}
+
+void AudioLibDemo::applyConvolutionReverb(AudioLib::AudioFile& audioFile)
+{
+
+}
+
+void AudioLibDemo::applyNoise(AudioLib::AudioFile& audioFile)
+{
+
+}
+
 AudioLibDemo::~AudioLibDemo()
 {
-    // delete m_OutputStreamBuf;
     delete ui;
 }
