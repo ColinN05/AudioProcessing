@@ -42,23 +42,29 @@ void AudioPlayerGraph::paintGL()
 
     if (m_File)
     {
-        QPolygonF graphPoints;
         const auto& samples = m_File->GetSamples();
-        float a = static_cast<float>(samples.size()) / width;
-        for (int x = 0; x < width; ++x)
+        unsigned int channels = m_File->GetChannels();
+        unsigned int frameCount = m_File->GetFrameCount();
+        float a = static_cast<float>(frameCount) / width;
+
+        for (int c = 0; c < channels; ++c)
         {
-            int i = static_cast<int>(x * a);
-            int y = static_cast<int>((samples[i] + 1) * 0.5f * height);
-            graphPoints << QPointF(x,y); 
+            QPolygonF graphPoints;
+            for (int x = 0; x < width; ++x)
+            {
+                int i = static_cast<int>(x * a);
+                int y = static_cast<int>(((samples[channels*i+c] + 1) * 0.5f + c)/channels*height);
+                graphPoints << QPointF(x,y); 
+            }
+
+            painter.drawPolyline(graphPoints);
+
+            int rectWidth = static_cast<int>(m_Progress*width);
+            QColor regionColor(0, 120, 255, 60); 
+            painter.setPen(QPen(QColor(0, 180, 255, 180), 1)); 
+            painter.setBrush(regionColor);
+            painter.drawRect(0, 0, rectWidth, height);
         }
-
-        painter.drawPolyline(graphPoints);
-
-        int rectWidth = static_cast<int>(m_Progress*width);
-        QColor regionColor(0, 120, 255, 60); 
-        painter.setPen(QPen(QColor(0, 180, 255, 180), 1)); 
-        painter.setBrush(regionColor);
-        painter.drawRect(0, 0, rectWidth, height);
     }
 }
 

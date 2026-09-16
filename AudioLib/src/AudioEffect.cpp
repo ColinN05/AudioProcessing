@@ -399,13 +399,6 @@ namespace AudioLib
 
     void ConvolutionReverbEffect::ApplyInPlace(AudioFile& audioFile)
     {
-        if (audioFile.GetChannels() != 1)
-        {
-            std::cout << "Convolution reverb is only supported for single channel audio files.\n";
-            assert(false && "AudioFile must be single-channel.");
-            return;
-        }
-
         AudioFile* reverbFile;
         bool resampleRequired = false;
         if (m_ReverbFile->GetSampleRate() == audioFile.GetSampleRate())
@@ -422,32 +415,43 @@ namespace AudioLib
 
         std::vector<float>& samples = audioFile.GetSamples(); 
         std::vector<float> reverbSamples = reverbFile->GetSamples();
+        unsigned int frameCount = audioFile.GetFrameCount();
+        std::vector<float> channelSamples;
+        unsigned int channels = audioFile.GetChannels();
 
         reverbSamples.resize(samples.size(), 0.0f);
 
         int n = 1;
-        while (n < samples.size())
+        while (n < frameCount)
         {
             n <<= 1;
         }
-        samples.resize(n,0.0f);
+        channelSamples.resize(n, 0.0f);
         reverbSamples.resize(n,0.0f);
 
-        auto fftsamples = fft(samples);
-        auto fftreverbSamples = fft(reverbSamples);
-
-        std::vector<complex> samplesComplex(samples.size());
-
-        for (int i = 0; i < samples.size(); ++i)
+        for (int c = 0; c < channels; ++c)
         {
-            samplesComplex[i] = fftsamples[i]*fftreverbSamples[i];
-        }
+            for (int i = 0; i < frameCount; ++i)
+            {
+                channelSamples[i] = samples[channels*i+c];
+            }
 
-        samplesComplex = std::move(fft(samplesComplex,true));
+            auto fftChannelSamples = fft(channelSamples);
+            auto fftReverbSamples = fft(reverbSamples);
 
-        for (int i = 0; i < samples.size(); ++i)
-        {
-            samples[i] = samplesComplex[i].real();
+            std::vector<complex> samplesComplex(n);
+
+            for (int i = 0; i < n; ++i)
+            {
+                samplesComplex[i] = fftChannelSamples[i]*fftReverbSamples[i];
+            }
+
+            samplesComplex = std::move(fft(samplesComplex,true));
+
+            for (int i = 0; i < frameCount; ++i)
+            {
+                samples[channels*i+c] = samplesComplex[i].real();
+            }
         }
 
         if (resampleRequired)

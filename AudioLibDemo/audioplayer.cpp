@@ -79,6 +79,7 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
     connect(m_MediaPlayer, &QMediaPlayer::sourceChanged, this, 
         [=](const QUrl& source)
         {
+            m_MediaPlayer->stop();
             m_Graph->m_File = std::make_unique<AudioLib::AudioFile>(source.toString().toStdString().substr(7));
         }
     );

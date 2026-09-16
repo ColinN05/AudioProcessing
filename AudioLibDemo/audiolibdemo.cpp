@@ -270,10 +270,13 @@ void AudioLibDemo::createConvolutionReverbCard()
 
     auto* lightOption = new QRadioButton("light");
     lightOption->setObjectName("lightOption");
+    auto* mediumOption = new QRadioButton("medium");
+    mediumOption->setObjectName("mediumOption");
     auto* heavyOption = new QRadioButton("heavy");
     heavyOption->setObjectName("heavyOption");
     lightOption->setChecked(true);
     m_ConvolutionReverbCard->addWidget(lightOption);
+    m_ConvolutionReverbCard->addWidget(mediumOption);
     m_ConvolutionReverbCard->addWidget(heavyOption);
     m_EffectCardLayout->addWidget(m_ConvolutionReverbCard, 0, Qt::AlignTop);
 }
@@ -319,6 +322,7 @@ void AudioLibDemo::applyEffects()
     std::string source = sourceUrl.toString().toStdString().substr(7);
 
     AudioLib::AudioFile inputFile(source);
+    m_OutputAudioPlayer->stop();
     std::cout << "Applying audio effects . . .\n";
     applyGain(inputFile);
     applyMonoToStereo(inputFile);
@@ -438,10 +442,15 @@ void AudioLibDemo::applyConvolutionReverb(AudioLib::AudioFile& audioFile)
     std::unique_ptr<AudioLib::AudioFile> reverbFile;
 
     bool light = m_ConvolutionReverbCard->findChild<QRadioButton*>("lightOption")->isChecked();
+    bool medium = m_ConvolutionReverbCard->findChild<QRadioButton*>("mediumOption")->isChecked();
 
     if (light)
     {
         reverbFile = std::make_unique<AudioLib::AudioFile>(TEST_AUDIO_DIR"/WireGrind_m_0.3s_06w_100Hz_02m.wav");
+    }
+    else if (medium)
+    {
+        reverbFile = std::make_unique<AudioLib::AudioFile>(TEST_AUDIO_DIR"/WireGrind_m_0.8s_99w_100Hz_02m.wav");
     }
     else
     {
