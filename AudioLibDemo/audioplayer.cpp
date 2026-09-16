@@ -72,11 +72,24 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
             m_MediaPlayer->pause();
             m_PlayButton->setText("Play");
         }
+
+        m_Graph->m_Progress = static_cast<float>(m_ProgressSlider->value()) / m_ProgressSlider->maximum();
     });
+
+    connect(m_MediaPlayer, &QMediaPlayer::sourceChanged, this, 
+        [=](const QUrl& source)
+        {
+            m_Graph->m_File = std::make_unique<AudioLib::AudioFile>(source.toString().toStdString().substr(7));
+        }
+    );
 
     connect(m_ProgressSlider, &QSlider::sliderMoved, m_MediaPlayer, &QMediaPlayer::setPosition);
 
+    m_Graph = new AudioPlayerGraph;
+    m_Graph->setFixedHeight(250);
+
     m_Layout = new QVBoxLayout(this);
+    m_Layout->addWidget(m_Graph);
     m_Layout->addWidget(new QLabel(title));
     if (!m_Output)
     {
@@ -84,6 +97,7 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
     }
     m_Layout->addWidget(m_PlayButton);
     m_Layout->addWidget(m_ProgressSlider);
+
 }
 
 void AudioPlayer::setSource(const std::string& source)

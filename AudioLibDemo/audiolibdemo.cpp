@@ -35,11 +35,11 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     createNoiseCard();
     createBandPassFilterCard();
     createPanEffectCard();
-    createMonoToStereoCard();
-    createStereoToMonoCard();
     // createClipCard();
     createResampleCard();
     createCompressorCard();
+    createMonoToStereoCard();
+    createStereoToMonoCard();
 
     auto* m_OutputStreamBuf = new TextEditStreamBuf(ui->output);
     std::cout.rdbuf(m_OutputStreamBuf);
@@ -59,11 +59,8 @@ AudioLibDemo::AudioLibDemo(QWidget *parent)
     m_OutputAudioPlayer = new AudioPlayer("Output Audio", true);
     ui->audioPlayerHorizontalLayout->addWidget(m_OutputAudioPlayer);
 
-    ui->verticalLayout->insertStretch(0);
-    ui->verticalLayout->insertStretch(1);
-
     m_ApplyEffectsButton = new QPushButton("Apply Effects");
-    ui->verticalLayout->insertWidget(3, m_ApplyEffectsButton);
+    ui->verticalLayout->insertWidget(1, m_ApplyEffectsButton);
 
     connect(m_ApplyEffectsButton, &QPushButton::clicked, this, [=](){applyEffects();});
 }
@@ -73,7 +70,7 @@ void AudioLibDemo::createGainEffectCard()
     m_GainEffectCard = new Card("Gain");
     
     auto* slider = new QSlider(Qt::Horizontal);
-    slider->setRange(1,300);
+    slider->setRange(1,1000);
     slider->setValue(100);
     slider->setObjectName("gainFactorSlider");
 

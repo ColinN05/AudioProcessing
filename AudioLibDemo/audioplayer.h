@@ -1,5 +1,7 @@
 #pragma once
 
+#include "audioplayergraph.h"
+
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QPushButton>
@@ -20,4 +22,5 @@ private:
     QPushButton* m_PlayButton, *m_FileButton;
     QSlider* m_ProgressSlider;
     QVBoxLayout* m_Layout;
+    AudioPlayerGraph* m_Graph;
 };

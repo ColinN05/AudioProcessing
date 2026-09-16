@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Multimedia)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia OpenGLWidgets)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
         card.cpp
         texteditstreambuf.cpp
         audioplayer.cpp
+        audioplayergraph.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -50,6 +51,7 @@ target_link_libraries(AudioLibDemo
     PRIVATE 
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Multimedia
+        Qt${QT_VERSION_MAJOR}::OpenGLWidgets
     PUBLIC
         AudioLib
 )
