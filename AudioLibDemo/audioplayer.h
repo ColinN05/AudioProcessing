@@ -9,6 +9,14 @@
 #include <QVBoxLayout>
 #include <QFileDialog>
 
+#ifdef Q_OS_LINUX
+    #define AUDIO_FILEPATH_STRIP 7
+#elif defined(Q_OS_WIN) 
+    #define AUDIO_FILEPATH_STRIP 8
+#else
+    static_assert(false && "Unsupported platform!");
+#endif
+
 class AudioPlayer : public QWidget
 {
 public:

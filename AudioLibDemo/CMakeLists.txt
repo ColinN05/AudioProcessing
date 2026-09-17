@@ -56,6 +56,25 @@ target_link_libraries(AudioLibDemo
         AudioLib
 )
 
+if (CMAKE_GENERATOR MATCHES "^Visual Studio")
+    target_compile_options(AudioLibDemo PRIVATE
+        /Zc:rvalueCast
+        /Zc:inline
+        /Zc:strictStrings
+        /Zc:throwingNew
+        /permissive-
+        /Zc:__cplusplus
+        /Zc:externConstexpr
+        /utf-8
+        /w34100
+        /w34189
+        /w44996
+        /w44456
+        /w44457
+        /w44458
+    )
+endif()
+
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.

@@ -319,7 +319,7 @@ void AudioLibDemo::applyEffects()
         return;
     }
 
-    std::string source = sourceUrl.toString().toStdString().substr(7);
+    std::string source = sourceUrl.toString().toStdString().substr(AUDIO_FILEPATH_STRIP);
 
     AudioLib::AudioFile inputFile(source);
     m_OutputAudioPlayer->stop();
@@ -334,6 +334,7 @@ void AudioLibDemo::applyEffects()
     applyBandPassFilter(inputFile);
     applyConvolutionReverb(inputFile);
     applyNoise(inputFile);
+    m_OutputAudioPlayer->setSource("");
     inputFile.Write(OUTPUT_AUDIO_DIR"/output.wav");
     m_OutputAudioPlayer->hide();
     ui->audioPlayerHorizontalLayout->removeWidget(m_OutputAudioPlayer);

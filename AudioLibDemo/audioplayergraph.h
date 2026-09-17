@@ -19,6 +19,6 @@ protected:
 private:
     friend class AudioPlayer;
     std::unique_ptr<AudioLib::AudioFile> m_File;
-    float m_Progress;
+    float m_Progress = 0.0f;
     QTimer *m_updateTimer;
 };

@@ -15,13 +15,13 @@ namespace AudioLib
 
         float* samples;
 
-        m_Type = filepath.extension();
+        m_Type = filepath.extension().string();
 
         if (m_Type == ".wav")
         {
             drwav_uint64 frameCount;
             samples = drwav_open_file_and_read_pcm_frames_f32(
-                filepath.c_str(), &m_Channels, &m_SampleRate, &frameCount, nullptr
+                filepath.string().c_str(), &m_Channels, &m_SampleRate, &frameCount, nullptr
             );
             m_FrameCount = static_cast<size_t>(frameCount);
         }
@@ -49,13 +49,12 @@ namespace AudioLib
 
     void AudioFile::Write(const std::string& pathstring)
     {
-        drwav_data_format format = {
-            .container = drwav_container_riff,
-            .format = DR_WAVE_FORMAT_IEEE_FLOAT,
-            .channels = m_Channels,
-            .sampleRate = m_SampleRate,
-            .bitsPerSample = 32
-        };
+        drwav_data_format format;
+        format.container = drwav_container_riff;
+        format.format = DR_WAVE_FORMAT_IEEE_FLOAT;
+        format.channels = m_Channels;
+        format.sampleRate = m_SampleRate;
+        format.bitsPerSample = 32;
 
         drwav wav;
 

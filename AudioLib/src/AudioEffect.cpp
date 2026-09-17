@@ -474,7 +474,7 @@ namespace AudioLib
         std::vector<complex> whiteNoiseFreq(n,0);
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(0.0f, 2.0f * static_cast<float>(M_PI));
+        std::uniform_real_distribution<float> dist(0.0f, 2.0f * 3.14159f);
         for (int i = 0; i < n; ++i)
         {
             whiteNoiseFreq[i] += std::polar(1.0f,dist(gen));
@@ -507,7 +507,7 @@ namespace AudioLib
         std::vector<complex> brownianNoiseFreq(n,0);
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> dist(0.0f, 2.0f * static_cast<float>(M_PI));
+        std::uniform_real_distribution<float> dist(0.0f, 2.0f * 3.14159f);
         std::normal_distribution<float> normal(0.0f, 1.0f);
         for (int i = 1; i < n/2; ++i)
         {

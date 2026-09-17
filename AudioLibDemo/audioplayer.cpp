@@ -80,7 +80,15 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
         [=](const QUrl& source)
         {
             m_MediaPlayer->stop();
-            m_Graph->m_File = std::make_unique<AudioLib::AudioFile>(source.toString().toStdString().substr(7));
+
+            if (!source.isEmpty())
+            {
+                m_Graph->m_File = std::make_unique<AudioLib::AudioFile>(source.toString().toStdString().substr(AUDIO_FILEPATH_STRIP));
+            }
+            else
+            {
+                m_Graph->m_File.reset();
+            }
         }
     );
 
@@ -104,5 +112,13 @@ AudioPlayer::AudioPlayer(const QString& title, bool output, QWidget* parent)
 void AudioPlayer::setSource(const std::string& source)
 {
     m_MediaPlayer->stop();
-    m_MediaPlayer->setSource(QUrl::fromLocalFile(QString::fromStdString(source)));
+
+    if (source.empty())
+    {
+        m_MediaPlayer->setSource(QUrl());
+    }
+    else
+    {
+        m_MediaPlayer->setSource(QUrl::fromLocalFile(QString::fromStdString(source)));
+    }
 }
